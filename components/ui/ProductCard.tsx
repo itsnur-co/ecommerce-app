@@ -9,10 +9,11 @@ interface ProductCardProps {
   rating: number;
   onAdd: () => void;
   styled?: any;
+  onPress?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ image, name, price, rating, onAdd, styled }) => {
-  return (
+const ProductCard: React.FC<ProductCardProps> = ({ image, name, price, rating, onAdd, styled, onPress }) => {
+  const CardContent = (
     <View style={[styles.card, styled ]}>
       <Image source={image} style={styles.image} />
       <Text style={styles.name}>{name}</Text>
@@ -28,6 +29,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ image, name, price, rating, o
       </View>
     </View>
   );
+  if (onPress) {
+    return (
+      <TouchableOpacity activeOpacity={0.85} onPress={onPress}>{CardContent}</TouchableOpacity>
+    );
+  }
+  return CardContent;
 };
 
 const styles = StyleSheet.create({

@@ -118,7 +118,7 @@ const NewArrivalSection = () => {
   );
 };
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: any) {
   const { data, loading, error } = useQuery(GET_PRODUCTS);
   const products: Product[] = data?.products?.nodes || [];
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -158,6 +158,7 @@ export default function HomeScreen() {
                 rating={item.averageRating ? parseFloat(item.averageRating) : 0}
                 onAdd={() => {}}
                 styled={{ flex: 1 }}
+                onPress={() => navigation.navigate('productDetails', { slug: item.slug })}
               />
             )}
           />
