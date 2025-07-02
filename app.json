@@ -33,6 +33,25 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/Sagita.ttf"],
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Sagita",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Sagita.ttf",
+                    "weight": 400
+                  }
+                ]
+              }
+            ]
+          }
+        }
       ]
     ],
     "experiments": {
