@@ -1,171 +1,145 @@
+import CategorySection from '@/components/ui/CategoriesSection';
+import FeaturedSection from '@/components/ui/FeaturedProductSection';
+import NewArrivalSection from '@/components/ui/NewArrivalSection';
+import ProductCard from '@/components/ui/ProductCard';
+import ProductCarousel from '@/components/ui/ProductCarousel';
+import SearchBar from '@/components/ui/SearchBar';
+import SectionHeader from '@/components/ui/SectionHeader';
+import { useFilteredProducts } from '@/hooks/useFilteredProduct';
+import { GET_PRODUCTS } from '@/queries/product';
+import { RootStackParamList } from '@/types/navigation';
+import { Product } from '@/types/product';
 import { useQuery } from '@apollo/client';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import CategoryCarousel from '../components/ui/CategoryCarousel';
-import ProductCard from '../components/ui/ProductCard';
-import ProductCarousel from '../components/ui/ProductCarousel';
-import SectionHeader from '../components/ui/SectionHeader';
-import { GET_FEATURED_PRODUCTS } from '../queries/featured';
-import { GET_NEW_ARRIVAL_PRODUCTS } from '../queries/newarrival';
-import { GET_PRODUCTS } from '../queries/product';
-import { GET_PRODUCT_CATEGORY } from '../queries/shop';
+import { StackNavigationProp } from '@react-navigation/stack';
+import React, { useState } from 'react';
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-// Define the product type based on the GraphQL query
-interface Product {
-  id: string;
-  slug: string;
-  name: string;
-  averageRating?: string;
-  image?: { sourceUrl: string; altText?: string };
-  price?: string;
-  regularPrice?: string;
-  productCategories?: { nodes: { slug: string }[] };
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MainTabs'>;
+
+interface HomeScreenProps {
+  navigation: HomeScreenNavigationProp;
 }
 
-const SearchBar = ({ search, setSearch }: { search: string; setSearch: (v: string) => void }) => (
-  <View style={styles.searchBarContainer}>
-    <Ionicons name="search" size={22} color="#888" style={{ marginLeft: 8 }} />
-    <TextInput
-      style={styles.searchInput}
-      placeholder="Search products..."
-      placeholderTextColor="#aaa"
-      value={search}
-      onChangeText={setSearch}
-    />
-    {search.length > 0 && (
-      <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>
-        <Ionicons name="close-circle" size={20} color="#888" />
-      </TouchableOpacity>
-    )}
-  </View>
-);
-
-const CategorySection = ({ selectedCategory, setSelectedCategory }: { selectedCategory: string; setSelectedCategory: (v: string) => void }) => {
-  const { data, loading, error } = useQuery(GET_PRODUCT_CATEGORY);
-  const categories = data?.productCategories?.nodes?.map((cat: { slug: string; name: string }) => ({ id: cat.slug, name: cat.name })) || [];
-
-  useEffect(() => {
-    if (!selectedCategory && categories.length > 0) {
-      setSelectedCategory(categories[0].id);
-    }
-  }, [categories, selectedCategory]);
-
-  if (loading) return <ActivityIndicator size="small" color="#222" style={{ marginTop: 16 }} />;
-  if (error) return <Text style={{ color: 'red', margin: 16 }}>Error loading categories: {error.message}</Text>;
-  if (!categories.length) return null;
-
-  return (
-    <CategoryCarousel
-      categories={categories}
-      selectedId={selectedCategory}
-      onSelect={setSelectedCategory}
-    />
-  );
-};
-
-const FeaturedSection = () => {
-  const { data, loading, error } = useQuery(GET_FEATURED_PRODUCTS);
-  const featuredProducts: Product[] = data?.products?.nodes || [];
-  return (
-    <>
-      <SectionHeader title="Featured Products" onSeeAll={() => {}} />
-      {loading && <ActivityIndicator size="small" color="#222" style={{ marginTop: 16 }} />}
-      {error && <Text style={{ color: 'red', margin: 16 }}>Error loading featured products: {error.message}</Text>}
-      {!loading && !error && (
-        <View style={styles.bestSellerRow}>
-          {featuredProducts.map((item: Product) => (
-            <ProductCard
-              key={item.id}
-              image={{ uri: item.image?.sourceUrl }}
-              name={item.name}
-              price={item.price || item.regularPrice || ''}
-              rating={item.averageRating ? parseFloat(item.averageRating) : 0}
-              onAdd={() => {}}
-              styled={{ flex: 1 }}
-            />
-          ))}
-        </View>
-      )}
-    </>
-  );
-};
-
-const NewArrivalSection = () => {
-  const { data, loading, error } = useQuery(GET_NEW_ARRIVAL_PRODUCTS);
-  const newArrivals: Product[] = data?.products?.nodes || [];
-  return (
-    <>
-      <SectionHeader title="New Arrival" onSeeAll={() => {}} />
-      {loading && <ActivityIndicator size="small" color="#222" style={{ marginTop: 16 }} />}
-      {error && <Text style={{ color: 'red', margin: 16 }}>Error loading new arrivals: {error.message}</Text>}
-      {!loading && !error && (
-        <ProductCarousel
-          data={newArrivals}
-          renderItem={({ item }: { item: Product }) => (
-            <ProductCard
-              image={{ uri: item.image?.sourceUrl }}
-              name={item.name}
-              price={item.price || item.regularPrice || ''}
-              rating={item.averageRating ? parseFloat(item.averageRating) : 0}
-              onAdd={() => {}}
-              styled={{ flex: 1 }}
-            />
-          )}
-        />
-      )}
-    </>
-  );
-};
-
-export default function HomeScreen({ navigation }: any) {
-  const { data, loading, error } = useQuery(GET_PRODUCTS);
-  const products: Product[] = data?.products?.nodes || [];
+export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const { data, loading, error, refetch } = useQuery(GET_PRODUCTS);
+  const productsData: Product[] = data?.products?.nodes || [];
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [search, setSearch] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Filter products by search and selected category
-  const filteredProducts: Product[] = products.filter(item => {
-    const matchesSearch = item?.name?.toLowerCase().includes(search?.toLowerCase());
-    const matchesCategory = selectedCategory
-      ? item?.productCategories?.nodes?.some((cat) => cat.slug === selectedCategory)
-      : true;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProducts = useFilteredProducts(productsData, search, selectedCategory);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+    } catch (err) {
+      console.error('Error refreshing:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleProductPress = (slug: string) => {
+    navigation.navigate('ProductDetails', { slug });
+  };
+
+  const handleClearFilters = () => {
+    setSearch('');
+    setSelectedCategory('');
+  };
+
+  const renderProductCard = ({ item }: { item: Product }) => (
+    <ProductCard
+      image={{ uri: item.image?.sourceUrl }}
+      name={item.name}
+      price={item.price || item.regularPrice || ''}
+      rating={item.averageRating ? parseFloat(item.averageRating) : 0}
+      onAdd={() => {
+        // TODO: Add to cart functionality
+        console.log('Add to cart:', item.id);
+      }}
+      styled={styles.productCard}
+      onPress={() => handleProductPress(item.slug)}
+    />
+  );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
+    <ScrollView 
+      style={styles.container} 
+      contentContainerStyle={styles.contentContainer}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Modern Furniture</Text>
           <Text style={styles.subtitle}>for your house</Text>
         </View>
       </View>
+      
+      {/* Search Bar */}
       <SearchBar search={search} setSearch={setSearch} />
-      <CategorySection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-      {loading && <ActivityIndicator size="large" color="#222" style={{ marginTop: 32 }} />}
-      {error && <Text style={{ color: 'red', margin: 16 }}>Error loading products: {error.message}</Text>}
+      
+      {/* Categories */}
+      <CategorySection 
+        selectedCategory={selectedCategory} 
+        setSelectedCategory={setSelectedCategory} 
+      />
+
+      {/* Loading State */}
+      {loading && !refreshing && (
+        <ActivityIndicator size="large" color="#1a8c4a" style={styles.loader} />
+      )}
+
+      {/* Error State */}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error loading products</Text>
+          <Text style={styles.errorSubtext}>{error.message}</Text>
+        </View>
+      )}
+      
+      {/* Filtered Products Section */}
       {!loading && !error && filteredProducts.length > 0 && (
-        <>
-          <SectionHeader title="Products" onSeeAll={() => {}} />
+        <View style={styles.productsSection}>
+          <SectionHeader 
+            title={`Products${search || selectedCategory ? ' (Filtered)' : ''}`}
+            onSeeAll={() => {
+              // TODO: Navigate to products listing page
+              console.log('See all products');
+            }}
+          />
           <ProductCarousel
             data={filteredProducts}
-            renderItem={({ item }: { item: Product }) => (
-              <ProductCard
-                image={{ uri: item.image?.sourceUrl }}
-                name={item.name}
-                price={item.price || item.regularPrice || ''}
-                rating={item.averageRating ? parseFloat(item.averageRating) : 0}
-                onAdd={() => {}}
-                styled={{ flex: 1 }}
-                onPress={() => navigation.navigate('productDetails', { slug: item.slug })}
-              />
-            )}
+            renderItem={renderProductCard}
           />
-        </>
+        </View>
       )}
-      <FeaturedSection />
-      <NewArrivalSection />
+
+      {/* No Results State */}
+      {!loading && !error && filteredProducts.length === 0 && (search || selectedCategory) && (
+        <View style={styles.noResultsContainer}>
+          <Text style={styles.noResultsText}>
+            No products found {search && `for "${search}"`}
+          </Text>
+          <Text style={styles.noResultsSubtext}>
+            Try adjusting your search or category filter
+          </Text>
+          <Text style={styles.clearFiltersText} onPress={handleClearFilters}>
+            Clear Filters
+          </Text>
+        </View>
+      )}
+      
+      {/* Featured Products */}
+      <FeaturedSection navigation={navigation} />
+      
+      {/* New Arrivals */}
+      <NewArrivalSection navigation={navigation} />
     </ScrollView>
   );
 }
@@ -174,60 +148,93 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
-    paddingTop: 32,
+  },
+  contentContainer: {
+    paddingTop: 50,
+    paddingBottom: 24,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#222',
+    lineHeight: 34,
   },
   subtitle: {
-    fontSize: 15,
-    color: '#888',
-    marginTop: 2,
+    fontSize: 16,
+    color: '#666',
+    marginTop: 4,
+    lineHeight: 20,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  loader: {
+    marginTop: 40,
+    alignSelf: 'center',
   },
-  bestSellerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 8,
+  errorContainer: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: '#fff5f5',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ffebee',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#d32f2f',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
     marginBottom: 8,
   },
-  searchBarContainer: {
-    flexDirection: 'row',
+  errorSubtext: {
+    color: '#d32f2f',
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.8,
+  },
+  productsSection: {
+    marginBottom: 20,
+  },
+  productCard: {
+    marginHorizontal: 6,
+  },
+  noResultsContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 20,
+    margin: 20,
     backgroundColor: '#fff',
-    borderRadius: 24,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingVertical: 6,
+    borderRadius: 12,
     shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  searchInput: {
-    flex: 1,
+  noResultsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  noResultsSubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  clearFiltersText: {
     fontSize: 16,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    color: '#222',
-    backgroundColor: 'transparent',
+    color: '#1a8c4a',
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
-  clearButton: {
-    padding: 4,
-    marginRight: 8,
-  },
-}); 
+});
