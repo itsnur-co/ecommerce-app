@@ -9,7 +9,12 @@ const LOCAL_CART_KEY = 'guest_cart';
 
 export function useCart() {
   const { user } = useAuthForm();
+
+
+  // Check if user is logged in
   const isLoggedIn = !!user;
+
+  console.log('User logged in:', isLoggedIn)
 
   // Apollo hooks for logged-in users
   const { data, loading, refetch } = useQuery(GET_CART_PRODUCTS, { skip: !isLoggedIn });

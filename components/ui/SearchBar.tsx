@@ -3,20 +3,34 @@ import Feather from '@expo/vector-icons/Feather';
 import React from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
-const SearchBar = ({ search, setSearch }: { search: string; setSearch: (v: string) => void }) => {
+interface SearchBarProps {
+  search: string;
+  setSearch: (v: string) => void;
+  onFilterPress?: () => void;
+  showFilterIcon?: boolean;
+}
+
+const SearchBar = ({ search, setSearch, onFilterPress, showFilterIcon }: SearchBarProps) => {
   return (
-    <View style={styles.searchBarContainer}>
-     <Feather name="search" size={28} color="white" />
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search products..."
-        placeholderTextColor="#fff"
-        value={search}
-        onChangeText={setSearch}
-      />
-      {search.length > 0 && (
-        <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>
-          <AntDesign name="closecircleo" size={24} color="white" />
+    <View style={styles.searchBarRow}>
+      <View style={styles.searchBarContainer}>
+        <Feather name="search" size={28} color="white" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search products..."
+          placeholderTextColor="#fff"
+          value={search}
+          onChangeText={setSearch}
+        />
+        {search.length > 0 && (
+          <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>
+            <AntDesign name="closecircleo" size={24} color="white" />
+          </TouchableOpacity>
+        )}
+      </View>
+      {showFilterIcon && (
+        <TouchableOpacity style={styles.filterButton} onPress={onFilterPress}>
+          <Feather name="sliders" size={24} color="#222" />
         </TouchableOpacity>
       )}
     </View>
@@ -24,17 +38,21 @@ const SearchBar = ({ search, setSearch }: { search: string; setSearch: (v: strin
 };
 
 const styles = StyleSheet.create({
+  searchBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    marginHorizontal: 10,
+  },
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#000',
     borderRadius: 8,
-    marginBottom: 12,
     paddingVertical: 6,
-    marginHorizontal:10,
     height: 55,
-    paddingHorizontal:10,
-
+    paddingHorizontal: 10,
+    flex: 1,
   },
   searchInput: {
     flex: 1,
@@ -46,6 +64,14 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
+  },
+  filterButton: {
+    marginLeft: 8,
+    backgroundColor: '#f4f4f4',
+    borderRadius: 8,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

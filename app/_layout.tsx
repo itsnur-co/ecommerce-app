@@ -43,14 +43,41 @@ function MainTabs() {
       initialRouteName="Home"
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ color, size, focused }) => {
           const iconName = getTabIcon(route.name);
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return (
+            <View style={{
+              backgroundColor: focused ? '#e6f9f0' : 'transparent',
+              borderRadius: 24,
+              padding: focused ? 8 : 0,
+              shadowColor: focused ? '#1a8c4a' : 'transparent',
+              shadowOpacity: focused ? 0.15 : 0,
+              shadowRadius: focused ? 8 : 0,
+              shadowOffset: { width: 0, height: 2 },
+            }}>
+              <Ionicons name={iconName} size={focused ? 30 : 24} color={focused ? '#1a8c4a' : color} />
+            </View>
+          );
         },
         tabBarActiveTintColor: '#1a8c4a',
         tabBarInactiveTintColor: '#888',
-        tabBarStyle: styles.tabBar,
-        tabBarLabelStyle: styles.tabBarLabel,
+        tabBarStyle: {
+          ...styles.tabBar,
+          borderRadius: 24,
+          marginHorizontal: 16,
+          marginBottom: 12,
+          height: 70,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 2 },
+        },
+        tabBarLabelStyle: {
+          ...styles.tabBarLabel,
+          fontSize: 13,
+          marginBottom: 4,
+        },
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />

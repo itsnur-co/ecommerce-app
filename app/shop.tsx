@@ -1,9 +1,10 @@
 import CategoriesSection from '@/components/ui/CategoriesSection';
 import ProductCard from '@/components/ui/ProductCard';
+import SearchBar from '@/components/ui/SearchBar';
 import { useQuery } from '@apollo/client';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useState } from 'react';
-import { ActivityIndicator, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GET_PRODUCTS } from '../queries/product';
 
@@ -26,6 +27,11 @@ export default function ShopScreen({ navigation }: any) {
     navigation.navigate('ProductDetails', { slug });
   };
 
+  const handleFilterPress = () => {
+    // TODO: Open filter modal or sheet
+    alert('Filter button pressed!');
+  };
+
   const renderProduct = ({ item }: { item: any }) => (
     <ProductCard
       image={item.image?.sourceUrl ? { uri: item.image.sourceUrl } : require('../assets/images/partial-react-logo.png')}
@@ -40,49 +46,42 @@ export default function ShopScreen({ navigation }: any) {
   );
 
   return (
-   <SafeAreaView style={styles.container}>
-     <View >
-     
-     <View style={styles.searchRow}>
-       <Ionicons name="search" size={22} color="#888" style={{ marginRight: 8 }} />
-       <TextInput
-         style={styles.searchInput}
-         placeholder="Search"
-         value={search}
-         onChangeText={setSearch}
-       />
-       <TouchableOpacity style={styles.voiceBtn}>
-         <Ionicons name="mic-outline" size={22} color="#fff" />
-       </TouchableOpacity>
-     </View>
-     <CategoriesSection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
-     <View style={styles.sectionRow}>
-       <Text style={styles.sectionTitle}>Products</Text>
-       <TouchableOpacity>
-         <Text style={styles.seeAll}>See All</Text>
-       </TouchableOpacity>
-     </View>
-     {loading ? (
-       <ActivityIndicator size="large" color="#1a8c4a" style={{ marginTop: 40 }} />
-     ) : error ? (
-       <Text style={styles.errorText}>Failed to load products.</Text>
-     ) : (
-       <FlatList
-         data={filteredProducts}
-         renderItem={renderProduct}
-         keyExtractor={(item) => item.id}
-         numColumns={2}
-         columnWrapperStyle={{ justifyContent: 'space-between' }}
-         contentContainerStyle={{ paddingBottom: 24, paddingTop: 8 }}
-         showsVerticalScrollIndicator={false}
-       />
-     )}
-   </View>
-   </SafeAreaView>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>Shop</Text>
+        <View style={styles.headerIcons}>
+          <TouchableOpacity style={styles.headerIcon}><Ionicons name="search" size={22} color="#222" /></TouchableOpacity>
+          <TouchableOpacity style={styles.headerIcon}><Ionicons name="mic-outline" size={22} color="#222" /></TouchableOpacity>
+        </View>
+      </View>
+      <SearchBar search={search} setSearch={setSearch} showFilterIcon onFilterPress={handleFilterPress} />
+      <CategoriesSection selectedCategory={selectedCategory} setSelectedCategory={setSelectedCategory} />
+      <View style={styles.sectionRow}>
+        <Text style={styles.sectionTitle}>Products</Text>
+        <TouchableOpacity>
+          <Text style={styles.seeAll}>See All</Text>
+        </TouchableOpacity>
+      </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#1a8c4a" style={{ marginTop: 40 }} />
+      ) : error ? (
+        <Text style={styles.errorText}>Failed to load products.</Text>
+      ) : (
+        <FlatList
+          data={filteredProducts}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: 'space-between' }}
+          contentContainerStyle={{ paddingBottom: 24, paddingTop: 8 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </SafeAreaView>
   );
 }
 
-
+const CARD_WIDTH = width / 2 - 24;
 
 const styles = StyleSheet.create({
   container: {

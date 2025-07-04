@@ -2,7 +2,18 @@ import { GET_PRODUCT_BY_SLUG } from '@/queries/product';
 import { useQuery } from '@apollo/client';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+
+import { BORDER_RADIUS, COLORS, FONT_SIZES, FONT_WEIGHTS, LINE_HEIGHTS, SPACING } from '@/constants/theme';
 import { ProductDetailsScreenRouteProp } from '../types/navigation';
 
 interface ProductDetailsProps {
@@ -10,77 +21,166 @@ interface ProductDetailsProps {
   navigation: any;
 }
 
-const sizes = ['S', 'M', 'L', 'XL'];
+const { width } = Dimensions.get('window');
+const SIZES = ['S', 'M', 'L', 'XL'] as const;
+
+// Fallback images - replace with your actual fallback images
+const FALLBACK_IMAGES = [
+  require('../assets/images/products/men-offwhite-shirt.png'),
+  require('../assets/images/products/men-black-shirt.png'),
+  require('../assets/images/products/huddi.png'),
+];
 
 export default function ProductDetails({ route, navigation }: ProductDetailsProps) {
   const { slug } = route.params;
-
-  const { data , loading, error } = useQuery(GET_PRODUCT_BY_SLUG, {
+  
+  // Apollo query
+  const { data, loading, error } = useQuery(GET_PRODUCT_BY_SLUG, {
     variables: { slug },
   });
+  
+  // Component state
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<typeof SIZES[number]>('L');
+  const [quantity, setQuantity] = useState(1);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  const item = data?.product
-
-  console.log('Product Details:', item);
-
-  // Example data, replace with real product data
-  const product = {
-    name: 'Cotton T-Shirt',
-    category: 'Outerwear Men',
-    price: 86.0,
-    images: [
-    item?.image?.sourceUrl,
-      require('../assets/images/products/men-offwhite-shirt.png'),
-      require('../assets/images/products/men-black-shirt.png'),
-      require('../assets/images/products/huddi.png'),
-    ],
-    description:
-      'A cotton T-shirt is a must-have for its softness, breathability, and effortless style. Ideal for any season, it keeps you cool in warm weather and adds a light layer when needed. With a range of colors...',
+  // Handlers
+  const handleQuantityChange = (increment: boolean) => {
+    setQuantity(prev => increment ? prev + 1 : Math.max(1, prev - 1));
   };
 
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('L');
-  const [quantity, setQuantity] = useState(1);
+  const handleAddToCart = () => {
+    // TODO: Implement add to cart functionality
+    console.log('Add to cart:', { 
+      product: data?.product, 
+      size: selectedSize, 
+      quantity 
+    });
+  };
+
+  const handleBuyNow = () => {
+    // TODO: Implement buy now functionality
+    console.log('Buy now:', { 
+      product: data?.product, 
+      size: selectedSize, 
+      quantity 
+    });
+  };
+
+  const toggleFavorite = () => {
+    setIsFavorite(prev => !prev);
+    // TODO: Implement favorite functionality
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Loading product...</Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error loading product: {error.message}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const product = data?.product;
+
+  if (!product) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Product not found</Text>
+        <TouchableOpacity 
+          style={styles.retryButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Use product images if available, otherwise use fallback
+  const displayImages = product.images?.length > 0 ? product.images : FALLBACK_IMAGES;
 
   return (
-    <ScrollView style={styles.container}>
-
-      {/* Product Images */}
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Product Images Section */}
       <View style={styles.imageSection}>
-        <Image source={product.images[selectedImage]} style={styles.mainImage} />
-        <TouchableOpacity style={styles.favoriteBtn}>
-          <MaterialIcons name="favorite-border" size={24} color="#ff6600" />
-        </TouchableOpacity>
-        <View style={styles.thumbnailRow}>
-          {product.images.map((img, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={[
-                styles.thumbnailWrapper,
-                selectedImage === idx && styles.selectedThumbnail,
-              ]}
-              onPress={() => setSelectedImage(idx)}
-            >
-              <Image source={img} style={styles.thumbnail} />
-            </TouchableOpacity>
-          ))}
+        <View style={styles.mainImageContainer}>
+          <Image 
+            source={displayImages[selectedImage]} 
+            style={styles.mainImage}
+            resizeMode="cover"
+          />
+          <TouchableOpacity 
+            style={styles.favoriteBtn}
+            onPress={toggleFavorite}
+          >
+            <MaterialIcons 
+              name={isFavorite ? "favorite" : "favorite-border"} 
+              size={24} 
+              color={COLORS.primary} 
+            />
+          </TouchableOpacity>
         </View>
+        
+        {displayImages.length > 1 && (
+          <View style={styles.thumbnailRow}>
+            {displayImages.map((img, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={[
+                  styles.thumbnailWrapper,
+                  selectedImage === idx && styles.selectedThumbnail,
+                ]}
+                onPress={() => setSelectedImage(idx)}
+              >
+                <Image 
+                  source={img} 
+                  style={styles.thumbnail}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
 
-      {/* Product Info */}
+      {/* Product Information Section */}
       <View style={styles.infoSection}>
         <View style={styles.titleRow}>
-          <View>
-            <Text style={styles.productName}>{item?.name.slice(0,20)}</Text>
-            <Text style={styles.productCategory}>{item?.category}</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.productName} numberOfLines={2}>
+              {product.name}
+            </Text>
+            <Text style={styles.productCategory}>
+              {product.category}
+            </Text>
           </View>
-          <Text style={styles.productPrice}>{item?.price}</Text>
+          <Text style={styles.productPrice}>
+            ${product.price}
+          </Text>
         </View>
 
-        {/* Size Selector */}
+        {/* Size Selection */}
         <Text style={styles.sectionLabel}>Select Size</Text>
         <View style={styles.sizeRow}>
-          {sizes.map((size) => (
+          {SIZES.map((size) => (
             <TouchableOpacity
               key={size}
               style={[
@@ -101,38 +201,49 @@ export default function ProductDetails({ route, navigation }: ProductDetailsProp
           ))}
         </View>
 
-        {/* Quantity Selector */}
+        {/* Quantity Selection */}
+        <Text style={styles.sectionLabel}>Quantity</Text>
         <View style={styles.qtyRow}>
           <TouchableOpacity
             style={styles.qtyBtn}
-            onPress={() => setQuantity(Math.max(1, quantity - 1))}
+            onPress={() => handleQuantityChange(false)}
           >
-            <Text style={styles.qtyBtnText}>-</Text>
+            <Text style={styles.qtyBtnText}>−</Text>
           </TouchableOpacity>
           <Text style={styles.qtyValue}>{quantity}</Text>
           <TouchableOpacity
             style={styles.qtyBtn}
-            onPress={() => setQuantity(quantity + 1)}
+            onPress={() => handleQuantityChange(true)}
           >
             <Text style={styles.qtyBtnText}>+</Text>
           </TouchableOpacity>
         </View>
 
         {/* Description */}
-        <Text style={styles.sectionLabel}>Description</Text>
-        <Text style={styles.descriptionText}>
-          {item?.description}
-          <Text style={{ color: '#ff6600', fontWeight: 'bold' }}> Learn More</Text>
-        </Text>
+        {product.description && (
+          <>
+            <Text style={styles.sectionLabel}>Description</Text>
+            <Text style={styles.descriptionText}>
+              {product.description}
+              <Text style={styles.learnMoreText}> Learn More</Text>
+            </Text>
+          </>
+        )}
       </View>
 
       {/* Action Buttons */}
       <View style={styles.actionRow}>
-        <TouchableOpacity style={styles.cartBtn}>
-          <Ionicons name="cart-outline" size={22} color="#ff6600" />
+        <TouchableOpacity 
+          style={styles.cartBtn}
+          onPress={handleAddToCart}
+        >
+          <Ionicons name="cart-outline" size={22} color={COLORS.primary} />
           <Text style={styles.cartBtnText}>Add To Cart</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buyBtn}>
+        <TouchableOpacity 
+          style={styles.buyBtn}
+          onPress={handleBuyNow}
+        >
           <Text style={styles.buyBtnText}>Buy Now</Text>
         </TouchableOpacity>
       </View>
@@ -141,52 +252,235 @@ export default function ProductDetails({ route, navigation }: ProductDetailsProp
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#fff', flex: 1 },
-  header: {
-    flexDirection: 'row', alignItems: 'center', padding: 16, justifyContent: 'space-between',
+  container: {
+    backgroundColor: COLORS.white,
+    flex: 1,
   },
-  headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#222' },
-  headerIcons: { flexDirection: 'row', gap: 16 },
-  imageSection: { alignItems: 'center', marginTop: 8, marginBottom: 12 },
-  mainImage: { width: 220, height: 220, borderRadius: 16, backgroundColor: '#f7f7f7' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
+  loadingText: {
+    marginTop: SPACING.md,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textSecondary,
+    fontWeight: FONT_WEIGHTS.regular,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
+  },
+  errorText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textGray,
+    textAlign: 'center',
+    marginBottom: SPACING.lg,
+    lineHeight: LINE_HEIGHTS.md,
+  },
+  retryButton: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  retryButtonText: {
+    color: COLORS.white,
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.bold ,
+  },
+  imageSection: {
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  mainImageContainer: {
+    position: 'relative',
+  },
+  mainImage: {
+    width: width - 40,
+    height: width - 40,
+    borderRadius: BORDER_RADIUS.lg,
+    backgroundColor: COLORS.background,
+  },
   favoriteBtn: {
-    position: 'absolute', top: 12, right: 24, backgroundColor: '#fff', borderRadius: 20, padding: 6, elevation: 2,
+    position: 'absolute',
+    top: SPACING.md,
+    right: SPACING.md,
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: SPACING.sm,
+    elevation: 2,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  thumbnailRow: { flexDirection: 'row', marginTop: 12, gap: 10 },
+  thumbnailRow: {
+    flexDirection: 'row',
+    marginTop: SPACING.md,
+    gap: SPACING.sm,
+  },
   thumbnailWrapper: {
-    borderRadius: 8, borderWidth: 2, borderColor: 'transparent', padding: 2,
+    borderRadius: BORDER_RADIUS.md,
+    borderWidth: 2,
+    borderColor: 'transparent',
+    padding: 2,
   },
-  selectedThumbnail: { borderColor: '#ff6600', backgroundColor: '#fff7f0' },
-  thumbnail: { width: 48, height: 48, borderRadius: 8 },
-  infoSection: { paddingHorizontal: 20, marginTop: 8 },
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  productName: { fontSize: 20, fontWeight: 'bold', color: '#222' },
-  productCategory: { fontSize: 14, color: '#888', marginTop: 2 },
-  productPrice: { fontSize: 20, fontWeight: 'bold', color: '#222' },
-  sectionLabel: { fontSize: 15, fontWeight: '600', color: '#222', marginTop: 18, marginBottom: 8 },
-  sizeRow: { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  selectedThumbnail: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.lightOrange,
+  },
+  thumbnail: {
+    width: 48,
+    height: 48,
+    borderRadius: BORDER_RADIUS.sm,
+  },
+  infoSection: {
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.sm,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
+  },
+  titleContainer: {
+    flex: 1,
+    marginRight: SPACING.md,
+  },
+  productName: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.text,
+    lineHeight: LINE_HEIGHTS.lg,
+  },
+  productCategory: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
+    fontWeight: FONT_WEIGHTS.regular,
+  },
+  productPrice: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: FONT_WEIGHTS.bold,
+    color: COLORS.text,
+  },
+  sectionLabel: {
+    fontSize: FONT_SIZES.md,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.text,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  sizeRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
   sizeBtn: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 18, backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.white,
   },
-  selectedSizeBtn: { backgroundColor: '#ff6600', borderColor: '#ff6600' },
-  sizeText: { fontSize: 15, color: '#222', fontWeight: '500' },
-  selectedSizeText: { color: '#fff' },
-  qtyRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 18, marginTop: 8 },
+  selectedSizeBtn: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  sizeText: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.text,
+    fontWeight: FONT_WEIGHTS.medium,
+  },
+  selectedSizeText: {
+    color: COLORS.white,
+  },
+  qtyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
   qtyBtn: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 6, width: 36, alignItems: 'center', backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    padding: SPACING.sm,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
   },
-  qtyBtnText: { fontSize: 20, color: '#222', fontWeight: 'bold' },
-  qtyValue: { fontSize: 18, fontWeight: '600', color: '#222', minWidth: 24, textAlign: 'center' },
-  descriptionText: { fontSize: 14, color: '#666', marginTop: 6, marginBottom: 18, lineHeight: 20 },
+  qtyBtnText: {
+    fontSize: FONT_SIZES.lg,
+    color: COLORS.text,
+    fontWeight: FONT_WEIGHTS.bold,
+  },
+  qtyValue: {
+    fontSize: FONT_SIZES.lg,
+    fontWeight: FONT_WEIGHTS.medium,
+    color: COLORS.text,
+    minWidth: 30,
+    textAlign: 'center',
+  },
+  descriptionText: {
+    fontSize: FONT_SIZES.sm,
+    color: COLORS.textGray,
+    lineHeight: LINE_HEIGHTS.md,
+    marginBottom: SPACING.sm,
+  },
+  learnMoreText: {
+    color: COLORS.primary,
+    fontWeight: FONT_WEIGHTS.bold,
+  },
   actionRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginBottom: 24, marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.lg,
+    gap: SPACING.md,
   },
   cartBtn: {
-    flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#ff6600', borderRadius: 10, paddingVertical: 12, paddingHorizontal: 18, backgroundColor: '#fff', gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.white,
+    gap: SPACING.sm,
+    flex: 1,
+    justifyContent: 'center',
   },
-  cartBtnText: { color: '#ff6600', fontWeight: 'bold', fontSize: 16 },
+  cartBtnText: {
+    color: COLORS.primary,
+    fontWeight: FONT_WEIGHTS.bold,
+    fontSize: FONT_SIZES.md,
+  },
   buyBtn: {
-    backgroundColor: '#ff6600', borderRadius: 10, paddingVertical: 12, paddingHorizontal: 28, marginLeft: 12,
+    backgroundColor: COLORS.primary,
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  buyBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-}); 
+  buyBtnText: {
+    color: COLORS.white,
+    fontWeight: FONT_WEIGHTS.bold,
+    fontSize: FONT_SIZES.md,
+  },
+});

@@ -4,6 +4,8 @@ import { SIGNIN } from '../mutation/signin';
 import { SIGNUP } from '../mutation/signup';
 
 export function useAuthForm() {
+
+  
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState({ name: '', username: '', email: '', password: '' });
   const [error, setError] = useState('');
