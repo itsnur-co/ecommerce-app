@@ -11,6 +11,7 @@ import { RootStackParamList, TabParamList } from '../types/navigation';
 import CartScreen from './cart';
 import HomeScreen from './home';
 import ProductDetails from './product-details';
+import ShopScreen from './shop';
 
 const client = new ApolloClient({
   uri: 'https://app.metadroip.com/graphql',
@@ -24,16 +25,6 @@ const client = new ApolloClient({
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
-
-// Placeholder screens with improved styling
-function ShopScreen() {
-  return (
-    <View style={styles.placeholderContainer}>
-      <Text style={styles.placeholderText}>Shop</Text>
-      <Text style={styles.placeholderSubtext}>Coming Soon</Text>
-    </View>
-  );
-}
 
 // Icon mapping for better type safety
 const getTabIcon = (routeName: string): keyof typeof Ionicons.glyphMap => {
