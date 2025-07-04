@@ -23,6 +23,7 @@ const FeaturedSection = ({ navigation }: { navigation: NavigationProp<any> }) =>
               key={item.id}
               image={{ uri: item.image?.sourceUrl }}
               name={item.name}
+              regularPrice={item.regularPrice || ''}
               price={item.price || item.regularPrice || ''}
               rating={item.averageRating ? parseFloat(item.averageRating) : 0}
               onAdd={() => {}}

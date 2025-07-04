@@ -55,6 +55,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       image={{ uri: item.image?.sourceUrl }}
       name={item.name}
       price={item.price || item.regularPrice || ''}
+      regularPrice={item.regularPrice || ''}
       rating={item.averageRating ? parseFloat(item.averageRating) : 0}
       onAdd={() => {
         // TODO: Add to cart functionality

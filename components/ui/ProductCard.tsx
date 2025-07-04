@@ -1,30 +1,38 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+const width = Dimensions.get('window').width; 
 
 interface ProductCardProps {
   image: any;
   name: string;
   price: string;
+  regularPrice: string;
   rating: number;
   onAdd: () => void;
   styled?: any;
   onPress?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ image, name, price, rating, onAdd, styled, onPress }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ image, name, price, regularPrice,  rating, onAdd, styled, onPress }) => {
   const CardContent = (
     <View style={[styles.card, styled ]}>
       <Image source={image} style={styles.image} />
-      <Text style={styles.name}>{name}</Text>
+     
       <View style={styles.row}>
-        <Ionicons name="star" size={14} color="#FFD700" />
-        <Text style={styles.rating}>{rating.toFixed(1)}</Text>
+      <Text style={styles.name}>{name?.slice(0,10)}</Text>
+      <View style={styles.review}>
+        <AntDesign name="star" size={20} color="#FFD700" />
+       <Text style={styles.rating}>{rating.toFixed(1)}</Text>
+      </View>
       </View>
       <View style={styles.rowBetween}>
-        <Text style={styles.price}>{price}</Text>
+        <Text style={styles.price}>{price.replace('.00', '')}</Text>
+        
         <TouchableOpacity style={styles.addBtn} onPress={onAdd}>
-          <Ionicons name="add" size={20} color="#fff" />
+        <AntDesign name="shoppingcart" size={20} color="white" /> <Text style={{color:'#fff'}}>Cart</Text>
+
         </TouchableOpacity>
       </View>
     </View>
@@ -40,23 +48,21 @@ const ProductCard: React.FC<ProductCardProps> = ({ image, name, price, rating, o
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 14,
     margin: 6,
-    width: 150,
+    width: width / 2 - 12,
     shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
     elevation: 2,
+    
   },
   image: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    width: width / 2 - 12 - 1,
+    height: width / 2 - 12,
     alignSelf: 'center',
     marginBottom: 8,
-    resizeMode: 'contain',
+    resizeMode: 'cover',
   },
   name: {
     fontSize: 15,
@@ -66,30 +72,42 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   row: {
+    marginHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 4,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+  },
+  review: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 5,
   },
   rating: {
     fontSize: 13,
-    color: '#888',
+    color: '#000',
     marginLeft: 3,
   },
   rowBetween: {
+    padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   price: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#1a8c4a',
   },
   addBtn: {
-    backgroundColor: '#1a8c4a',
-    borderRadius: 16,
     padding: 6,
+    gap: 5,
+    paddingHorizontal:10,
+    color:'#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#000',
+    borderRadius: 16,
   },
 });
 
