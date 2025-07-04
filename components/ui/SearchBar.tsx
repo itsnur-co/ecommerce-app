@@ -1,21 +1,22 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import React from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 const SearchBar = ({ search, setSearch }: { search: string; setSearch: (v: string) => void }) => {
   return (
     <View style={styles.searchBarContainer}>
-      <Ionicons name="search" size={22} color="#888" style={{ marginLeft: 8 }} />
+     <Feather name="search" size={28} color="white" />
       <TextInput
         style={styles.searchInput}
         placeholder="Search products..."
-        placeholderTextColor="#aaa"
+        placeholderTextColor="#fff"
         value={search}
         onChangeText={setSearch}
       />
       {search.length > 0 && (
         <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>
-          <Ionicons name="close-circle" size={20} color="#888" />
+          <AntDesign name="closecircleo" size={24} color="white" />
         </TouchableOpacity>
       )}
     </View>
@@ -26,16 +27,14 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    marginHorizontal: 16,
+    backgroundColor: '#000',
+    borderRadius: 8,
     marginBottom: 12,
     paddingVertical: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 1,
+    marginHorizontal:10,
+    height: 55,
+    paddingHorizontal:10,
+
   },
   searchInput: {
     flex: 1,

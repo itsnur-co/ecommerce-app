@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
@@ -15,20 +14,7 @@ interface Props {
 
 const ITEM_WIDTH = 80;
 
-const getCategoryIcon = (id: string, color: string) => {
-  switch (id) {
-    case 'men':
-      return <Ionicons name="male" size={32} color={color} />;
-    case 'women':
-      return <Ionicons name="female" size={32} color={color} />;
-    case 'kids':
-      return <Ionicons name="happy" size={32} color={color} />;
-    case 'hoodies':
-      return <Ionicons name="shirt" size={32} color={color} />;
-    default:
-      return <Ionicons name="pricetag" size={32} color={color} />;
-  }
-};
+
 
 const CategoryCarousel: React.FC<Props> = ({ categories, selectedId, onSelect }) => {
   return (
@@ -46,7 +32,6 @@ const CategoryCarousel: React.FC<Props> = ({ categories, selectedId, onSelect })
             style={[styles.item, isSelected && styles.selected]}
             onPress={() => onSelect(item.id)}
           >
-            {getCategoryIcon(item.id, iconColor)}
             <Text style={[styles.label, isSelected && styles.selectedLabel]}>{item.name}</Text>
           </TouchableOpacity>
         );
@@ -68,6 +53,7 @@ const styles = StyleSheet.create({
     gap: 7,
     alignItems: 'center',
     padding: 8,
+    paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#222',
     borderRadius: 8,

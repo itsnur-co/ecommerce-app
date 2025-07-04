@@ -1,5 +1,6 @@
 import CategorySection from '@/components/ui/CategoriesSection';
 import FeaturedSection from '@/components/ui/FeaturedProductSection';
+import HomeHeading from '@/components/ui/HomeHeading';
 import NewArrivalSection from '@/components/ui/NewArrivalSection';
 import ProductCard from '@/components/ui/ProductCard';
 import ProductCarousel from '@/components/ui/ProductCarousel';
@@ -74,12 +75,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Modern Furniture</Text>
-          <Text style={styles.subtitle}>for your house</Text>
-        </View>
-      </View>
+      <HomeHeading/>
       
       {/* Search Bar */}
       <SearchBar search={search} setSearch={setSearch} />
