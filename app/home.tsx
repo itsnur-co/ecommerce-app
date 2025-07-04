@@ -13,7 +13,8 @@ import { Product } from '@/types/product';
 import { useQuery } from '@apollo/client';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCart } from '../hooks/useCart';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MainTabs'>;
 
@@ -27,6 +28,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [search, setSearch] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const { addToCart } = useCart();
 
   const filteredProducts = useFilteredProducts(productsData, search, selectedCategory);
 
@@ -57,9 +59,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       price={item.price || item.regularPrice || ''}
       regularPrice={item.regularPrice || ''}
       rating={item.averageRating ? parseFloat(item.averageRating) : 0}
-      onAdd={() => {
-        // TODO: Add to cart functionality
-        console.log('Add to cart:', item.id);
+      onAdd={async () => {
+        await addToCart(item, 1);
+        Alert.alert('Success', 'Product added to cart!');
       }}
       styled={styles.productCard}
       onPress={() => handleProductPress(item.slug)}

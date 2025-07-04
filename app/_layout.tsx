@@ -8,6 +8,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import AccountForm from '../components/form/AccountForm';
 import { RootStackParamList, TabParamList } from '../types/navigation';
+import CartScreen from './cart';
 import HomeScreen from './home';
 import ProductDetails from './product-details';
 
@@ -30,15 +31,6 @@ function ShopScreen() {
     <View style={styles.placeholderContainer}>
       <Text style={styles.placeholderText}>Shop</Text>
       <Text style={styles.placeholderSubtext}>Coming Soon</Text>
-    </View>
-  );
-}
-
-function CartScreen() {
-  return (
-    <View style={styles.placeholderContainer}>
-      <Text style={styles.placeholderText}>Cart</Text>
-      <Text style={styles.placeholderSubtext}>Your cart is empty</Text>
     </View>
   );
 }
