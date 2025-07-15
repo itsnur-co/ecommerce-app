@@ -1,24 +1,27 @@
-import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import * as Font from 'expo-font';
-import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
-import AccountForm from '../components/form/AccountForm';
-import { RootStackParamList, TabParamList } from '../types/navigation';
-import CartScreen from './cart';
-import HomeScreen from './home';
-import ProductDetails from './product-details';
-import ShopScreen from './shop';
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {
+  NavigationContainer,
+  NavigationIndependentTree,
+} from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import * as Font from "expo-font";
+import React from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import AccountForm from "../components/form/AccountForm";
+import { RootStackParamList, TabParamList } from "../types/navigation";
+import CartScreen from "./cart";
+import HomeScreen from "./home";
+import ProductDetails from "./product-details";
+import ShopScreen from "./shop";
 
 const client = new ApolloClient({
-  uri: 'https://app.metadroip.com/graphql',
+  uri: "https://app.metadroip.com/graphql",
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
-      errorPolicy: 'all',
+      errorPolicy: "all",
     },
   },
 });
@@ -29,12 +32,12 @@ const Stack = createStackNavigator<RootStackParamList>();
 // Icon mapping for better type safety
 const getTabIcon = (routeName: string): keyof typeof Ionicons.glyphMap => {
   const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
-    Home: 'home',
-    Account: 'person',
-    Shop: 'pricetags',
-    Cart: 'cart',
+    Home: "home",
+    Account: "person",
+    Shop: "pricetags",
+    Cart: "cart",
   };
-  return iconMap[routeName] || 'home';
+  return iconMap[routeName] || "home";
 };
 
 function MainTabs() {
@@ -46,21 +49,27 @@ function MainTabs() {
         tabBarIcon: ({ color, size, focused }) => {
           const iconName = getTabIcon(route.name);
           return (
-            <View style={{
-              backgroundColor: focused ? '#e6f9f0' : 'transparent',
-              borderRadius: 24,
-              padding: focused ? 8 : 0,
-              shadowColor: focused ? '#1a8c4a' : 'transparent',
-              shadowOpacity: focused ? 0.15 : 0,
-              shadowRadius: focused ? 8 : 0,
-              shadowOffset: { width: 0, height: 2 },
-            }}>
-              <Ionicons name={iconName} size={focused ? 30 : 24} color={focused ? '#1a8c4a' : color} />
+            <View
+              style={{
+                backgroundColor: focused ? "#e6f9f0" : "transparent",
+                borderRadius: 24,
+                padding: focused ? 8 : 0,
+                shadowColor: focused ? "#1a8c4a" : "transparent",
+                shadowOpacity: focused ? 0.15 : 0,
+                shadowRadius: focused ? 8 : 0,
+                shadowOffset: { width: 0, height: 2 },
+              }}
+            >
+              <Ionicons
+                name={iconName}
+                size={focused ? 30 : 24}
+                color={focused ? "black" : color}
+              />
             </View>
           );
         },
-        tabBarActiveTintColor: '#1a8c4a',
-        tabBarInactiveTintColor: '#888',
+        tabBarActiveTintColor: "#1a8c4a",
+        tabBarInactiveTintColor: "#888",
         tabBarStyle: {
           ...styles.tabBar,
           borderRadius: 24,
@@ -68,7 +77,7 @@ function MainTabs() {
           marginBottom: 12,
           height: 70,
           elevation: 8,
-          shadowColor: '#000',
+          shadowColor: "#000",
           shadowOpacity: 0.08,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 2 },
@@ -90,7 +99,7 @@ function MainTabs() {
 
 export default function RootLayout() {
   const [fontsLoaded] = Font.useFonts({
-    Sagita: require('../assets/fonts/Sagita.ttf'),
+    Sagita: require("../assets/fonts/Sagita.ttf"),
   });
 
   if (!fontsLoaded) {
@@ -108,14 +117,25 @@ export default function RootLayout() {
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="MainTabs" component={MainTabs} />
-            <Stack.Screen 
-              name="ProductDetails" 
-              component={ProductDetails} 
+            <Stack.Screen
+              name="ProductDetails"
+              component={ProductDetails}
               options={{
                 headerShown: true,
-                headerTitle: 'Product Details',
+                headerTitle: "Product Details",
                 headerStyle: styles.header,
-                headerTintColor: '#222',
+                headerTintColor: "#222",
+                headerTitleStyle: styles.headerTitle,
+              }}
+            />
+            <Stack.Screen
+              name="Shop"
+              component={ShopScreen}
+              options={{
+                headerShown: true,
+                headerTitle: "Shop",
+                headerStyle: styles.header,
+                headerTintColor: "#222",
                 headerTitleStyle: styles.headerTitle,
               }}
             />
@@ -129,53 +149,53 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f8f8",
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   placeholderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f8f8",
   },
   placeholderText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#222',
+    fontWeight: "bold",
+    color: "#222",
     marginBottom: 8,
   },
   placeholderSubtext: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   tabBar: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: "#e0e0e0",
     paddingBottom: 5,
     paddingTop: 5,
     height: 60,
   },
   tabBarLabel: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

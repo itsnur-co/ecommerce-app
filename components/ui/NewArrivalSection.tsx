@@ -8,29 +8,43 @@ import ProductCard from "./ProductCard";
 import ProductCarousel from "./ProductCarousel";
 import SectionHeader from "./SectionHeader";
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'MainTabs'>;
+type HomeScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "MainTabs"
+>;
 
 interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
 }
 
-
-
 const NewArrivalSection = ({ navigation }: HomeScreenProps) => {
-  
   const { data, loading, error } = useQuery(GET_NEW_ARRIVAL_PRODUCTS);
   const newArrivals: Product[] = data?.products?.nodes || [];
 
   const handleProductPress = (slug: string) => {
-    navigation.navigate('ProductDetails', { slug });
+    navigation.navigate("ProductDetails", { slug });
   };
 
-  
+  const handleSeeAll = (slug: string) => {
+    navigation.navigate("Shop", { slug });
+  };
+
   return (
     <View style={styles.container}>
-      <SectionHeader title="New Arrival" onSeeAll={() => {}} />
-      {loading && <ActivityIndicator size="small" color="#222" style={styles.loader} />}
-      {error && <Text style={styles.errorText}>Error loading new arrivals: {error.message}</Text>}
+      <SectionHeader
+        title="New Arrival"
+        onSeeAll={() => {
+          handleSeeAll("shop");
+        }}
+      />
+      {loading && (
+        <ActivityIndicator size="small" color="#222" style={styles.loader} />
+      )}
+      {error && (
+        <Text style={styles.errorText}>
+          Error loading new arrivals: {error.message}
+        </Text>
+      )}
       {!loading && !error && (
         <ProductCarousel
           data={newArrivals}
@@ -38,8 +52,8 @@ const NewArrivalSection = ({ navigation }: HomeScreenProps) => {
             <ProductCard
               image={{ uri: item.image?.sourceUrl }}
               name={item.name}
-              price={item.price || item.regularPrice || ''}
-              regularPrice={item.regularPrice || ''}
+              price={item.price || item.regularPrice || ""}
+              regularPrice={item.regularPrice || ""}
               rating={item.averageRating ? parseFloat(item.averageRating) : 0}
               onAdd={() => {}}
               styled={styles.productCard}
@@ -58,18 +72,18 @@ const styles = StyleSheet.create({
   },
   loader: {
     marginTop: 16,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   errorText: {
-    color: '#ff4444',
+    color: "#ff4444",
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     margin: 16,
     padding: 12,
-    backgroundColor: '#fff5f5',
+    backgroundColor: "#fff5f5",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ffebee',
+    borderColor: "#ffebee",
   },
   productCard: {
     flex: 1,

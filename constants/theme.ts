@@ -1,21 +1,20 @@
 export const COLORS = {
-  background: '#FAF9F6',
-  card: '#fff',
-  primary: '#990E1B',
-  secondary: '#AC6C49',
-  accent: '#1a8c4a',
-  error: '#e74c3c',
-  text: '#222',
-  textSecondary: '#888',
-  border: '#ddd',
-  white: '#fff',
-  black: '#222',
-  gray: '#888',
-  lightGray: '#ddd',
-  textGray: '#666',
-  lightOrange: '#fff7f0',
+  background: "#FAF9F6",
+  card: "#fff",
+  primary: "#990E1B",
+  secondary: "#AC6C49",
+  accent: "#1a8c4a",
+  error: "#e74c3c",
+  text: "#222",
+  textSecondary: "#888",
+  border: "#ddd",
+  white: "#fff",
+  black: "#222",
+  gray: "#888",
+  lightGray: "#ddd",
+  textGray: "#666",
+  lightOrange: "#fff7f0",
 };
-
 
 export const SPACING = {
   xs: 4,
@@ -23,18 +22,20 @@ export const SPACING = {
   md: 16,
   lg: 24,
   xl: 32,
-}; 
+};
 
 export const BORDER_RADIUS = {
   sm: 4,
   md: 8,
   lg: 16,
+  xl: 24,
+  full: 9999,
 };
 
 export const SHADOW = {
-  light: '0 1px 3px rgba(0, 0, 0, 0.1)',
-  medium: '0 2px 6px rgba(0, 0, 0, 0.1)',
-  heavy: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+  medium: "0 2px 6px rgba(0, 0, 0, 0.1)",
+  heavy: "0 4px 12px rgba(0, 0, 0, 0.1)",
 };
 
 export const FONT_SIZES = {
@@ -45,7 +46,7 @@ export const FONT_SIZES = {
   xl: 20,
 };
 
-export const FONT_WEIGHTS : any = {
+export const FONT_WEIGHTS: any = {
   regular: 400,
   medium: 500,
   bold: 700,
@@ -60,9 +61,9 @@ export const LINE_HEIGHTS = {
 };
 
 export const TRANSITIONS = {
-  fast: '0.2s ease-in-out',
-  medium: '0.3s ease-in-out',
-  slow: '0.5s ease-in-out',
+  fast: "0.2s ease-in-out",
+  medium: "0.3s ease-in-out",
+  slow: "0.5s ease-in-out",
 };
 
 export const Z_INDEX = {
@@ -71,5 +72,3 @@ export const Z_INDEX = {
   tooltip: 800,
   overlay: 700,
 };
-
-
